@@ -179,3 +179,48 @@ CV1
 # To crossvalidate on log data
 CV2 <- cross_validate(data, "Duration ~ Condition", folds_col = '.folds', family='gaussian', link = "log", REML = FALSE)
 CV2
+
+# To create heat map for search
+FixationsV2 = read.csv("FixationsV2.csv")
+jet.colors <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
+library(jpeg)
+library(grid)
+library(ggplot2)
+img = readJPEG("EyeTrackingScripts/foraging/ng090ws.jpg")
+g = rasterGrob(img, interpolate = TRUE) # make the image readable to R
+
+ggplot(subset(FixationsV2, Task=='VisualSearch' & ParticipantID=='6_3_m2' & Trial==6), aes(x = PositionX, y = 1081-PositionY)) +
+  xlim(0,1920) +
+  ylim(0, 1080) +
+  annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=-0, ymax=1080) + #xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+  stat_density2d(geom="raster", aes(fill=..density.., alpha=sqrt(sqrt(..density..))), contour=FALSE, n=1000) + 
+  scale_alpha(range = c(0.1, 0.6)) + scale_fill_gradientn(colours = jet.colors(10), trans="sqrt")
+
+# To heat map for count
+img2 = readJPEG("EyeTrackingScripts/foraging/ng150ws.jpg")
+g = rasterGrob(img2, interpolate = TRUE) # make the image readable to R
+
+ggplot(subset(FixationsV2, Task=='VisualSearch' & ParticipantID=='3_1_f1' & Trial==8), aes(x = PositionX, y = 1081-PositionY)) +
+  xlim(0,1920) +
+  ylim(0, 1080) +
+  annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=-0, ymax=1080) + #xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+  stat_density2d(geom="raster", aes(fill=..density.., alpha=sqrt(sqrt(..density..))), contour=FALSE, n=1000) + 
+  scale_alpha(range = c(0.1, 0.6)) + scale_fill_gradientn(colours = jet.colors(10), trans="sqrt")
+
+# To create a scan path
+x= subset(FixationsV2, Task=='VisualSearch' & ParticipantID=='3_1_f1' & Trial==8)
+x=x[order(x$Fixation),]
+ggplot(x, aes(x = PositionX, y = 1081-PositionY)) +
+  annotation_custom(g, xmin=-Inf, xmax=Inf, ymin=-0, ymax=1080) +
+  geom_point(size = x$Duration/25, alpha = 0.5, color = "red") +
+  geom_path(size = 1, alpha = 0.3) +
+  geom_text(aes(label =Fixation, size = 5)) 
+
+# To visualize the emotional engagement experiment
+SamplesV2=read.csv("SamplesV2.csv")
+
+ggplot(subset(SamplesV2, Task == "SocialEngagement"), aes(x=TrialTime, y=PupilSize, color = ParticipantGender)) + 
+  geom_smooth() + facet_grid(~ActorGender) + xlim(0,6000)
+
+ggplot(subset(SamplesV2, Task == "SocialEngagement"), aes(x=TrialTime, y=PupilSize, color = Directionality)) + 
+  geom_smooth() + facet_grid(~Ostension) + xlim(0,6000)
