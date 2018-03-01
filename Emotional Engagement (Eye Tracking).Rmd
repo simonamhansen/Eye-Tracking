@@ -204,10 +204,10 @@ CV1 <- cross_validate(data, mixed_models, folds_col = '.folds', family='gaussian
 CV1
 
 # To create models
-Socialmodel=lmer(PupilSize ~ Ostension*Directionality + Fixation (1+Ostension*Directionality+ Fixation|ParticipantID), SocialData)
+Socialmodel=lmer(PupilSize ~ Ostension*Directionality + Fixation + (1+Ostension*Directionality+ Fixation|ParticipantID), SocialData)
 summary(Socialmodel)
 
-Socialmodel2=lmer(PupilSize ~ Ostension+Directionality + Fixation (1+Ostension+Directionality+Fixation|ParticipantID), SocialData)
+Socialmodel2=lmer(PupilSize ~ Ostension+Directionality + Fixation + (1+Ostension+Directionality+Fixation|ParticipantID), SocialData)
 summary(Socialmodel2)
 
 Socialmodel3=lmer(PupilSize ~ Ostension +Directionality + Fixation + (1 + Fixation|ParticipantID), SocialData)
