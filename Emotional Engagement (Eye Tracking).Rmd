@@ -18,6 +18,7 @@ library(stringr)
 library(groupdata2)
 library(cvms)
 library(lmerTest)
+library(ggplot2)
 
 # Load datafiles
 fix=read.csv("FixationsV1.csv")
@@ -177,16 +178,10 @@ Analysing the data from the emotional engagement experiment
 ```{r}
 
 # To visualize the emotional engagement experiment
-SamplesV2=read.csv("SamplesV2.csv")
-
-ggplot(subset(SamplesV2, Task == "SocialEngagement"), aes(x=TrialTime, y=PupilSize, color = ParticipantGender)) + 
-  geom_smooth() + facet_grid(~ActorGender) + xlim(0,6000)
-
-ggplot(subset(SamplesV2, Task == "SocialEngagement"), aes(x=TrialTime, y=PupilSize, color = Directionality)) + 
-  geom_smooth() + facet_grid(~Ostension) + xlim(0,6000)
-
-# To read fixation data
 FixationV2 = read.csv("FixationsV2.csv")
+
+ggplot(subset(FixationV2, Task == "SocialEngagement"), aes(x=Fixation, y=PupilSize, color = Directionality)) + 
+  geom_smooth() + facet_grid(~Ostension) + xlim(0,12)
 
 # Subsetting the data for the Social engagement task
 SocialData = subset(FixationV2, Task == "SocialEngagement")
@@ -200,20 +195,20 @@ data <- fold(SocialData, k = 3,
   arrange(.folds)
 
 # To specify models
-mixed_models <- c("PupilSize ~ Ostension * Directionality + (1+Ostension * Directionality|ParticipantID)",
-                  "PupilSize ~ Ostension + Directionality + (1+ Ostension + Directionality|ParticipantID)",
-                  "PupilSize ~ Ostension + Directionality + (1|ParticipantID)")
+mixed_models <- c("PupilSize ~ Ostension * Directionality + Fixation + (1+Ostension * Directionality + Fixation|ParticipantID)",
+                  "PupilSize ~ Ostension + Directionality + Fixation + (1+ Ostension + Directionality + Fixation|ParticipantID)",
+                  "PupilSize ~ Ostension + Directionality + Fixation + (1 + Fixation|ParticipantID)")
 
 # To crossvalidate
 CV1 <- cross_validate(data, mixed_models, folds_col = '.folds', family='gaussian', REML = FALSE)
 CV1
 
 # To create models
-Socialmodel=lmer(PupilSize ~ Ostension*Directionality + (1+Ostension*Directionality|ParticipantID), SocialData)
+Socialmodel=lmer(PupilSize ~ Ostension*Directionality + Fixation (1+Ostension*Directionality+ Fixation|ParticipantID), SocialData)
 summary(Socialmodel)
 
-Socialmodel2=lmer(PupilSize ~ Ostension+Directionality + (1+Ostension+Directionality|ParticipantID), SocialData)
+Socialmodel2=lmer(PupilSize ~ Ostension+Directionality + Fixation (1+Ostension+Directionality+Fixation|ParticipantID), SocialData)
 summary(Socialmodel2)
 
-Socialmodel3=lmer(PupilSize ~ Ostension +Directionality + (1|ParticipantID), SocialData)
+Socialmodel3=lmer(PupilSize ~ Ostension +Directionality + Fixation + (1 + Fixation|ParticipantID), SocialData)
 summary(Socialmodel3)
