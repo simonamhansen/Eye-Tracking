@@ -12,7 +12,6 @@ Preprocessing of data
 # Set working directory 
 setwd("C:/Users/simon/Google Drev/Uni/2018 - Eye tracking/Eye-Tracking")
 
-
 # Libraries
 library(dplyr)
 library(stringr)
